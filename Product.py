@@ -16,12 +16,4 @@ class Product:
         self._productPrice = value
 
     def __str__(self):
-        return f"Product Name: {self._product_name}, Price: {self._productPrice}"
-productList = []
-fileName = open("product.txt", "r")
-for line in fileName:
-    data = line.strip().split(",")
-    productName = data[0]
-    productPrice = float(data[1])
-    product = Product(productName, productPrice)
-    productList.append(product)
+        return f" {self._product_name}"

@@ -6,7 +6,7 @@ from Customer import Customer
 
 
 company=CompanyController()
-customerNames=company.customerName()
+
 def btnGetAllCustomer():
     all_customers = company.allCustomers()
     customer_info = "\n".join(str(customer) for customer in all_customers)
@@ -52,7 +52,7 @@ customer_frame.pack(fill=tk.X)
 # Select customer label
 selectCustomer = tk.Label(customer_frame, text="Select Customer:")
 selectCustomer.pack(side=tk.LEFT, padx=5)
-
+customerNames=company.customerName()
 # Sample customer options
 customers =["Choose"]+customerNames
 selected_customer = tk.StringVar(root)
@@ -82,8 +82,10 @@ process_frame.pack(fill=tk.X)
 selectProduct = tk.Label(process_frame, text="Select Product:")
 selectProduct.pack(side=tk.LEFT, padx=5)
 
-# Sample product options
-products = ["Product A", "Product B", "Product C"]
+
+productList=company.productList
+products = productList
+# products=["test1","test2","test3"]
 selected_product = tk.StringVar(root)
 selected_product.set(products[0])  # Default value
 

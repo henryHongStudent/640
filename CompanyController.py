@@ -6,8 +6,9 @@ class CompanyController:
     def __init__(self):
         self.allCustomer = []
         self.customerNames = []
+        self.productList = []  # Initialize product list
         self.load_customers()  # Initialize and load customer data
-
+        self.load_products()  # Initialize and load product data
     def load_customers(self):
         """Load customer data from file and populate self.allCustomer and self.customerNames."""
         self.customerNames = []
@@ -39,3 +40,16 @@ class CompanyController:
         if customer:
             return str(customer)
         return "Customer not found"
+    def load_products(self):
+        """Load product data from file and populate self.productList."""
+        try:
+            with open('product.txt', 'r') as filename:
+                for line in filename:
+                    data = line.strip().split(",")
+                    productName = data[0]
+                    self.productList.append(str(productName))
+        except FileNotFoundError:
+            print("Product file not found.")
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            
