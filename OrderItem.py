@@ -1,5 +1,5 @@
 class OrderItem:
-    def __init__(self, quantity, product):
+    def __init__(self, product,quantity):
         self._quantity = quantity
         self._product = product
 
@@ -16,5 +16,5 @@ class OrderItem:
         return self._product
 
     def __str__(self):
-        return f"Quantity: {self._quantity}, Product: {self._product}"
+        return f"{self._product}, Quantity: {self._quantity}"
 

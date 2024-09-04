@@ -1,19 +1,20 @@
 class Product:
     def __init__(self, product_name, productPrice):
-        self._product_name = product_name
-        self._productPrice = productPrice
+        self.__product_name = product_name
+        self.__productPrice = productPrice
 
     @property
     def product_name(self):
-        return self._product_name
+        return self.__product_name
 
     @property
     def productPrice(self):
-        return self._productPrice
+        return self.__productPrice
 
     @productPrice.setter
     def productPrice(self, value):
-        self._productPrice = value
-
+        self.__productPrice = value
+    def getPrice(self, quantity):
+     return self.__productPrice * quantity
     def __str__(self):
-        return f" {self._product_name}"
+        return f" {self.__product_name}, ${self.__productPrice} "
