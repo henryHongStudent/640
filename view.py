@@ -19,14 +19,52 @@ def btnGetAllOrders():
         messagebox.showinfo("Order List", all_orders_str)
     else:
         messagebox.showinfo("Order List", "No orders found.")
+def btnGetCustomerOrder():
+    customer_name = selected_customer.get()
+    if customer_name == "Choose":
+        messagebox.showwarning("Customer Selection Required", "Please select a customer before proceeding.")
+        return
+    orders = company.selected_customer_orders(customer_name)
+    if isinstance(orders, str):  # Check if the result is a string
+        messagebox.showinfo("Order List", orders)
+    else:
+        if orders:
+            list_customer_order = '\n\n'.join(str(order) for order in orders)
+            messagebox.showinfo("Order List", f"{customer_name}'s orders:\n{list_customer_order}")
+        else:
+            messagebox.showinfo("Payment List", f"{customer_name}'s orders: No order found.")
+def btnGetCustomerPayment():
+    customer_name = selected_customer.get()
+    if customer_name == "Choose":
+        messagebox.showwarning("Customer Selection Required", "Please select a customer before proceeding.")
+        return
+    payments = company.selected_customer_payment(customer_name)
+    if isinstance(payments, str):  # Check if the result is a string
+        messagebox.showinfo("Payment List", payments)
+    else:
+        if payments:
+            list_customer_payment = '\n\n'.join(str(order) for order in payments)
+            messagebox.showinfo("Payment List", f"{customer_name}'s Payment:\n{list_customer_payment}")
+        else :
+            messagebox.showinfo("Payment List", f"{customer_name}'s Payment: No payment found.")
+def update_customer_info(customer):
+    """Update the customer info display"""
+    customer_info_display.config(state=tk.NORMAL)
+    customer_info_display.delete(1.0, tk.END)
+    customer_info_display.insert(tk.END, str(customer))
+    customer_info_display.config(state=tk.DISABLED)
 def customerSelected(*args):
     """Display selected customer's details."""
     customer_name = selected_customer.get()
-    customer_info = company.get_single_customer(customer_name) # get customer info by name
-    customer_info_display.config(state=tk.NORMAL)
-    customer_info_display.delete(1.0, tk.END)
-    customer_info_display.insert(tk.END, customer_info)
-    customer_info_display.config(state=tk.DISABLED)
+    customer = company.get_single_customer(customer_name) # get customer info by name
+    if customer:
+        customer.addUpdate(update_customer_info)  # 옵저버 추가
+        update_customer_info(customer)
+    else:
+        customer_info_display.config(state=tk.NORMAL)
+        customer_info_display.delete(1.0, tk.END)
+        customer_info_display.insert(tk.END, "No customer selected")
+        customer_info_display.config(state=tk.DISABLED)
 
 def added_product_list():
     """Add selected product to the order and update order details display."""
@@ -53,6 +91,8 @@ def added_product_list():
         order_details_display.insert(tk.END, f"{product} X {item_qty} = ${subtotal:.2f}\n")
     order_details_display.insert(tk.END, f"====================\nTotal: ${total:.2f}")
     order_details_display.config(state=tk.DISABLED)
+    quantity_entry.delete(0, 'end')
+    selected_product.set(products[0])
 
 def btn_place_order():
     """Place a new order and reset the order details."""
@@ -64,19 +104,41 @@ def btn_place_order():
     order_details_display.insert(tk.END, "Order placed successfully.")
     order_details_display.config(state=tk.DISABLED)
 
-def process_payment():
+def btn_process_payment():
     """Process the payment with the entered amount."""
     amount = payment_amount_entry.get()
-    if not amount.replace('.', '', 1).isdigit():
-        messagebox.showwarning("Invalid Input", "Amount must be a number.")
+    customer_name = selected_customer.get()
+
+    if customer_name == "Choose":
+        messagebox.showwarning("Customer Selection Required", "Please select a customer before proceeding.")
         return
+    elif not amount.isdigit():
+        messagebox.showwarning("Invalid Input", "Quantity must be a number.")
+        return
+    else:
+        type,message = company.process_payment(amount, customer_name)
+        if type == "success":
+            messagebox.showinfo("Payment Success", message)
+        else:
+            messagebox.showinfo("Payment Failed", message)
+  
+        payment_amount_entry.delete(0, 'end')
+        
+def btn_all_payment():
+    # Retrieve all payments information
+    all_payments_info = company.get_all_payments()
+    
+    # Check if there are payments to display
+    if all_payments_info:
+        # Create a message to display all payments
+        payment_details = "\n".join(all_payments_info)
+        messagebox.showinfo("All Payments", payment_details)
+    else:
+        # Notify the user if there are no payments
+        messagebox.showinfo("All Payments", "No payments available.")
 
-    # Add payment processing logic here
-    # Example: Update customer balance, create a payment record, etc.
-
-    messagebox.showinfo("Payment", f"Payment of ${amount} processed.")
-
-root = tk.Tk()
+       
+root = tk.Tk() 
 root.title("Lincoln Office Supplies Order App by Seunguk Hong")
 
 # Center the window
@@ -160,7 +222,7 @@ payment_amount_label.pack(side=tk.LEFT, padx=5)
 payment_amount_entry = tk.Entry(process_payment_frame, width=50)
 payment_amount_entry.pack(side=tk.LEFT, padx=5)
 
-process_payment_button = tk.Button(process_payment_frame, text="Process Payment", command=process_payment)
+process_payment_button = tk.Button(process_payment_frame, text="Process Payment", command=btn_process_payment)
 process_payment_button.pack(side=tk.RIGHT, padx=5)
 
 # Reports section
@@ -169,10 +231,10 @@ reports_section.pack(pady=20, padx=20, fill=tk.X)
 reports_frame = tk.Frame(reports_section)
 reports_frame.pack(fill=tk.X)
 
-list_customer_orders_btn = tk.Button(reports_frame, text="List Customer Orders", command=lambda: messagebox.showinfo("Not Implemented", "Feature not implemented."))
+list_customer_orders_btn = tk.Button(reports_frame, text="List Customer Orders", command=btnGetCustomerOrder)
 list_customer_orders_btn.pack(side=tk.LEFT, padx=5)
 
-list_customer_payments_btn = tk.Button(reports_frame, text="List Customer Payments", command=lambda: messagebox.showinfo("Not Implemented", "Feature not implemented."))
+list_customer_payments_btn = tk.Button(reports_frame, text="List Customer Payments", command=btnGetCustomerPayment)
 list_customer_payments_btn.pack(side=tk.LEFT, padx=5)
 
 list_all_customers_btn = tk.Button(reports_frame, text="List All Customers", command=btnGetAllCustomer)
@@ -181,7 +243,7 @@ list_all_customers_btn.pack(side=tk.LEFT, padx=5)
 list_all_orders_btn = tk.Button(reports_frame, text="List All Orders", command=btnGetAllOrders)
 list_all_orders_btn.pack(side=tk.LEFT, padx=5)
 
-list_all_payments_btn = tk.Button(reports_frame, text="List All Payments", command=lambda: messagebox.showinfo("Not Implemented", "Feature not implemented."))
+list_all_payments_btn = tk.Button(reports_frame, text="List All Payments", command=btn_all_payment)
 list_all_payments_btn.pack(side=tk.LEFT, padx=5)
 
 exit_btn = tk.Button(reports_frame, text="EXIT", command=root.quit)
